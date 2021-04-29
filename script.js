@@ -1,4 +1,5 @@
 "use strict";
+// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -61,6 +62,7 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+//////////////////// DISPLAY MOVEMENTS //////////////////
 const displayMovement = (movements) => {
   containerMovements.innerHTML = "";
 
@@ -77,5 +79,17 @@ const displayMovement = (movements) => {
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
-
 displayMovement(account2.movements);
+
+//////////////////// COMPUTING USERNAMES //////////////////
+const createUsernames = (accounts) => {
+  accounts.forEach((account) => {
+    account.username = account.owner
+      .split(" ")
+      .map((x) => x[0])
+      .join("")
+      .toLowerCase();
+  });
+};
+
+createUsernames(accounts);
