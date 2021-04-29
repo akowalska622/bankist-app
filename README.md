@@ -11,6 +11,7 @@ Since line 65 of _script.js_ file the code is mostly mine, but checked with vide
 
 Firstly, you need to log in. There's no backend, the logging function is simply made by changing opacity of the _app_ element.
 There are four users:
+
 Account 1 login: js
 Account 1 password: 1111
 
