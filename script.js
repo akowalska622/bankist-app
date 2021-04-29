@@ -79,7 +79,6 @@ const displayMovement = (movements) => {
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
-displayMovement(account2.movements);
 
 //////////////////// COMPUTING USERNAMES //////////////////
 const createUsernames = (accounts) => {
@@ -93,3 +92,45 @@ const createUsernames = (accounts) => {
 };
 
 createUsernames(accounts);
+
+//////////////////// IMPLEMENTING LOGIN //////////////////
+const findAccount = (username) =>
+  accounts.find((acc) => acc.username === username);
+
+const displayMessage = ({ owner }) => {
+  labelWelcome.textContent = `Welcome back ${owner.split(" ")[0]}`;
+};
+
+const displayBalance = ({ movements, interestRate }) => {
+  labelBalance.textContent = movements.reduce((a, b) => a + b, 0) + "€";
+
+  labelSumOut.textContent =
+    Math.abs(movements.filter((x) => x < 0).reduce((a, b) => a + b, 0)) + "€";
+
+  labelSumIn.textContent =
+    movements.filter((x) => x > 0).reduce((a, b) => a + b, 0) + "€";
+
+  labelSumInterest.textContent = movements
+    .filter((x) => x > 0)
+    .map((deposit) => (deposit * interestRate) / 100)
+    .filter((int) => int >= 1)
+    .reduce((a, b) => a + b, 0);
+};
+
+const handleLogin = () => {
+  const user = findAccount(inputLoginUsername.value);
+  if (user?.pin === +inputLoginPin.value) {
+    containerApp.style.opacity = 1;
+    inputLoginUsername.value = inputLoginPin.value = "";
+    inputLoginPin.blur(); //loose focus on input fields
+
+    displayMessage(user);
+    displayMovement(user.movements);
+    displayBalance(user);
+  }
+};
+
+btnLogin.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleLogin();
+});
