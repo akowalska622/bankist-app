@@ -64,10 +64,11 @@ const inputClosePin = document.querySelector(".form__input--pin");
 
 let loggedUser;
 //////////////////// DISPLAY MOVEMENTS //////////////////
-const displayMovement = ({ movements }) => {
+const displayMovement = ({ movements }, sort = false) => {
   containerMovements.innerHTML = "";
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
 
-  movements.forEach((mov, idx) => {
+  movs.forEach((mov, idx) => {
     const type = mov > 0 ? "deposit" : "withdrawal";
     const html = `
     <div class="movements__row">
@@ -96,6 +97,8 @@ createUsernames(accounts);
 
 //////////////////// IMPLEMENTING LOGIN //////////////////
 //section completed without help of the instructor or solution
+//only .blur() taken from video
+
 const findAccount = (username) =>
   accounts.find((acc) => acc.username === username);
 
@@ -147,6 +150,7 @@ btnLogin.addEventListener("click", (e) => {
 
 //////////////////// IMPLEMENTING TRANSFERS //////////////////
 //section completed without help of the instructor or solution
+//only restricting amount taken from video (I didn't restrict it to be above 0 and under user's balance))
 
 const handleTransfer = (user) => {
   let receiver = accounts.find((x) => x.username === inputTransferTo.value);
@@ -175,9 +179,7 @@ btnTransfer.addEventListener("click", (e) => {
 
 //////////////////// DELETE ACCOUNT //////////////////
 //section completed without help of the instructor or solution
-//inputCloseUsername
-//inputClosePin
-//btnClose
+//100% solo work
 
 const handleLogout = () => {
   loggedUser = "";
@@ -200,4 +202,34 @@ const handleDelete = () => {
 btnClose.addEventListener("click", (e) => {
   e.preventDefault();
   handleDelete();
+});
+
+//////////////////// DELETE ACCOUNT //////////////////
+//section completed without help of the instructor or solution
+//100% solo
+
+const handleLoan = () => {
+  const loanAmount = inputLoanAmount.value;
+  if (loggedUser.movements.some((x) => x >= loanAmount * 0.1)) {
+    loggedUser.movements.push(+loanAmount);
+    updateUI(loggedUser);
+  }
+  inputLoanAmount.value = "";
+  inputLoanAmount.blur();
+};
+
+btnLoan.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleLoan();
+});
+
+//////////////////// SORT MOVEMENTS //////////////////
+let isSorted = false;
+btnSort.addEventListener("click", (e) => {
+  e.preventDefault();
+  // isSorted
+  //   ? displayMovement(loggedUser, false)
+  //   : displayMovement(loggedUser, true);
+  displayMovement(loggedUser, !isSorted);
+  isSorted = !isSorted;
 });
