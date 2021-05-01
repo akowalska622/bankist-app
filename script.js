@@ -233,3 +233,51 @@ btnSort.addEventListener("click", (e) => {
   displayMovement(loggedUser, !isSorted);
   isSorted = !isSorted;
 });
+
+//////////////////// BONUS ARRAY EXERCISES //////////////////
+//COMPLETED 100% SOLO
+
+//1. Sum all deposits from all of the account
+const bankDepositSum = accounts
+  .flatMap((x) => x.movements)
+  .filter((x) => x > 0)
+  .reduce((a, b) => a + b, 0);
+// console.log(bankDepositSum);
+
+//2. How many deposits there have been with at least 1000$
+const depositsOver1000 = accounts
+  .flatMap((x) => x.movements)
+  .filter((x) => x > 1000).length;
+//console.log(depositsOver1000);
+
+//2.1. The same using reduce
+const depositOver1000reduce = accounts
+  .flatMap((x) => x.movements)
+  .reduce((count, current) => (current >= 1000 ? count + 1 : count), 0);
+//console.log(depositOver1000reduce);
+
+//3. Create a new object which contains the sum of the deposits and of the withdrawals
+const { deposits, withdrawals } = accounts
+  .flatMap((x) => x.movements)
+  .reduce(
+    (sums, curr) => {
+      sums[curr > 0 ? "deposits" : "withdrawals"] += curr;
+      return sums;
+    },
+    { deposits: 0, withdrawals: 0 }
+  );
+
+//console.log(deposits, withdrawals);
+
+//4. Create a simple function to convert any string to a title case - all the words in the sentence are capitalzied except for some exceptions (eg. "a")
+const exceptions = ["a", "an", "the", "but", "or", "on", "in", "with"];
+const convertTitleCase = (title) => {
+  return title
+    .toLowerCase()
+    .split(" ")
+    .map((x) => (!exceptions.includes(x) ? x[0].toUpperCase() + x.slice(1) : x))
+    .join(" ");
+};
+
+console.log(convertTitleCase("this is a nice title"));
+console.log(convertTitleCase("this is a LONG title but not too long"));
