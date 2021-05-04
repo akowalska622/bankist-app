@@ -111,7 +111,7 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-let loggedUser;
+let loggedUser, timer;
 
 //////////////////// HANDLE DATE AND NUMBER FORMAT //////////////////
 const formatMovementDate = (date, locale) => {
@@ -233,18 +233,20 @@ const handleDateDisplay = ({ locale }) => {
 };
 
 const handleLogoutTimer = () => {
-  let time = 10;
-  const timer = setInterval(() => {
+  let time = 60 * 5;
+  const tick = () => {
     const min = String(Math.floor(time / 60)).padStart(2, 0);
     const sec = String(time % 60).padStart(2, 0);
     labelTimer.textContent = `${min}:${sec}`;
-    time--;
-
     if (time === 0) {
       clearInterval(timer);
       handleLogout();
     }
-  }, 1000);
+    time--;
+  };
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
 };
 
 const updateUI = (user) => {
@@ -255,15 +257,17 @@ const updateUI = (user) => {
 
 const handleLogin = () => {
   const user = findAccount(inputLoginUsername.value);
-  loggedUser = user;
 
   if (user?.pin === +inputLoginPin.value) {
+    loggedUser = user;
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginPin.blur(); //loose focus on input fields
     displayMessage(user);
     updateUI(user);
-    handleLogoutTimer();
+
+    if (timer) clearInterval(timer);
+    timer = handleLogoutTimer();
   }
 };
 
@@ -296,6 +300,8 @@ const handleTransfer = (user) => {
   inputTransferAmount.value = inputTransferTo.value = "";
   inputTransferAmount.blur();
   inputTransferTo.blur();
+  clearInterval(timer);
+  timer = handleLogoutTimer();
 };
 
 btnTransfer.addEventListener("click", (e) => {
@@ -344,6 +350,8 @@ const handleLoan = () => {
   }
   inputLoanAmount.value = "";
   inputLoanAmount.blur();
+  clearInterval(timer);
+  timer = handleLogoutTimer();
 };
 
 btnLoan.addEventListener("click", (e) => {
