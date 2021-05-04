@@ -232,6 +232,21 @@ const handleDateDisplay = ({ locale }) => {
   labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(now);
 };
 
+const handleLogoutTimer = () => {
+  let time = 10;
+  const timer = setInterval(() => {
+    const min = String(Math.floor(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    labelTimer.textContent = `${min}:${sec}`;
+    time--;
+
+    if (time === 0) {
+      clearInterval(timer);
+      handleLogout();
+    }
+  }, 1000);
+};
+
 const updateUI = (user) => {
   displayMovement(user);
   displayBalance(user);
@@ -248,6 +263,7 @@ const handleLogin = () => {
     inputLoginPin.blur(); //loose focus on input fields
     displayMessage(user);
     updateUI(user);
+    handleLogoutTimer();
   }
 };
 
@@ -294,6 +310,7 @@ btnTransfer.addEventListener("click", (e) => {
 const handleLogout = () => {
   loggedUser = "";
   containerApp.style.opacity = 0;
+  labelWelcome.textContent = "Log in to get started";
 };
 
 const handleDelete = () => {
@@ -392,7 +409,3 @@ const convertTitleCase = (title) => {
 
 //console.log(convertTitleCase("this is a nice title"));
 //console.log(convertTitleCase("this is a LONG title but not too long"));
-
-loggedUser = account1;
-updateUI(loggedUser);
-containerApp.style.opacity = 100;
