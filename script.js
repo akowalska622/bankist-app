@@ -19,8 +19,8 @@ const account1 = {
     "2020-04-01T10:17:24.185Z",
     "2020-05-08T14:11:59.604Z",
     "2020-05-27T17:01:17.194Z",
-    "2020-07-11T23:36:17.929Z",
-    "2020-07-12T10:51:36.790Z"
+    "2021-05-01T23:36:17.929Z",
+    "2021-05-02T10:51:36.790Z"
   ],
   currency: "EUR",
   locale: "pt-PT" // de-DE
@@ -112,19 +112,41 @@ const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
 let loggedUser;
+
+//////////////////// HANDLE DATE AND NUMBER FORMAT //////////////////
+const formatMovementDate = (date, locale) => {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+
+  const daysPassed = calcDaysPassed(new Date(), date);
+
+  if (daysPassed === 0) return "Today";
+  if (daysPassed === 1) return "Yesterday";
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  return new Intl.DateTimeFormat(locale).format(date);
+};
+
+const formatNumber = (num, locale, currency) => {
+  let options = {
+    style: "currency",
+    currency
+  };
+  return new Intl.NumberFormat(locale, options).format(num);
+};
+
 //////////////////// DISPLAY MOVEMENTS //////////////////
-const displayMovement = ({ movements, movementsDates }, sort = false) => {
+const displayMovement = (
+  { movements, movementsDates, locale, currency },
+  sort = false
+) => {
   containerMovements.innerHTML = "";
   const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
 
   movs.forEach((mov, idx) => {
     const type = mov > 0 ? "deposit" : "withdrawal";
     const date = new Date(movementsDates[idx]);
-
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
-    const displayDate = `${day}/${month}/${year}`;
+    const displayDate = formatMovementDate(date, locale);
+    const formattedMov = formatNumber(mov, locale, currency);
 
     const html = `
     <div class="movements__row">
@@ -132,7 +154,7 @@ const displayMovement = ({ movements, movementsDates }, sort = false) => {
       idx + 1
     } ${type}</div>
       <div class="movements__date">${displayDate}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${formattedMov}</div>
     </div>
     `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
@@ -165,41 +187,55 @@ const displayMessage = ({ owner }) => {
 
 const displayBalance = (account) => {
   account.balance = account.movements.reduce((a, b) => a + b, 0);
-  labelBalance.textContent = account.balance.toFixed(2) + "€";
+  labelBalance.textContent = formatNumber(
+    account.balance,
+    account.locale,
+    account.currency
+  );
 
-  labelSumOut.textContent =
-    Math.abs(
-      account.movements.filter((x) => x < 0).reduce((a, b) => a + b, 0)
-    ).toFixed(2) + "€";
+  let sumOut = Math.abs(
+    account.movements.filter((x) => x < 0).reduce((a, b) => a + b, 0)
+  );
+  labelSumOut.textContent = formatNumber(
+    sumOut,
+    account.locale,
+    account.currency
+  );
 
-  labelSumIn.textContent =
-    account.movements
-      .filter((x) => x > 0)
-      .reduce((a, b) => a + b, 0)
-      .toFixed(2) + "€";
+  let sumIn = account.movements.filter((x) => x > 0).reduce((a, b) => a + b, 0);
+  labelSumIn.textContent = formatNumber(
+    sumIn,
+    account.locale,
+    account.currency
+  );
 
-  labelSumInterest.textContent = account.movements
+  let sumInterest = account.movements
     .filter((x) => x > 0)
     .map((deposit) => (deposit * account.interestRate) / 100)
     .filter((int) => int >= 1)
-    .reduce((a, b) => a + b, 0)
-    .toFixed(2);
+    .reduce((a, b) => a + b, 0);
+
+  labelSumInterest.textContent = new Intl.NumberFormat(account.locale).format(
+    sumInterest
+  );
 };
 
-const handleDateDisplay = () => {
+const handleDateDisplay = ({ locale }) => {
+  const options = {
+    hour: "numeric",
+    minute: "numeric",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric"
+  };
   const now = new Date();
-  const day = `${now.getDate()}`.padStart(2, 0);
-  const month = `${now.getMonth() + 1}`.padStart(2, 0);
-  const year = now.getFullYear();
-  const hour = `${now.getHours()}`.padStart(2, 0);
-  const minutes = `${now.getMinutes()}`.padStart(2, 0);
-  labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
+  labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(now);
 };
 
 const updateUI = (user) => {
   displayMovement(user);
   displayBalance(user);
-  handleDateDisplay();
+  handleDateDisplay(user);
 };
 
 const handleLogin = () => {
@@ -356,26 +392,6 @@ const convertTitleCase = (title) => {
 
 //console.log(convertTitleCase("this is a nice title"));
 //console.log(convertTitleCase("this is a LONG title but not too long"));
-
-/*const account1 = {
-  owner: "Jonas Schmedtmann",
-  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
-  interestRate: 1.2, // %
-  pin: 1111,
-
-  movementsDates: [
-    "2019-11-18T21:31:17.178Z",
-    "2019-12-23T07:42:02.383Z",
-    "2020-01-28T09:15:04.904Z",
-    "2020-04-01T10:17:24.185Z",
-    "2020-05-08T14:11:59.604Z",
-    "2020-05-27T17:01:17.194Z",
-    "2020-07-11T23:36:17.929Z",
-    "2020-07-12T10:51:36.790Z"
-  ],
-  currency: "EUR",
-  locale: "pt-PT" // de-DE
-};*/
 
 loggedUser = account1;
 updateUI(loggedUser);
